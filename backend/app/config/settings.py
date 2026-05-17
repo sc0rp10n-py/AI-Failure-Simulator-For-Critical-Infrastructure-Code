@@ -21,6 +21,12 @@ OLLAMA_API_KEY = os.getenv("SENTINEL_OLLAMA_API_KEY", "")
 OPENAI_BASE_URL = os.getenv("SENTINEL_OPENAI_BASE_URL", "")
 OPENAI_API_KEY = os.getenv("SENTINEL_OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("SENTINEL_OPENAI_MODEL", "gpt-4o-mini")
+SANDBOX_ENABLED = os.getenv("SENTINEL_SANDBOX_ENABLED", "true").lower() == "true"
+SANDBOX_PREFER_DOCKER = os.getenv("SENTINEL_SANDBOX_PREFER_DOCKER", "true").lower() == "true"
+SANDBOX_USE_COMPOSE = os.getenv("SENTINEL_SANDBOX_USE_COMPOSE", "true").lower() == "true"
+SANDBOX_READY_TIMEOUT = float(os.getenv("SENTINEL_SANDBOX_READY_TIMEOUT", "90"))
+SANDBOX_INSTALL_TIMEOUT = float(os.getenv("SENTINEL_SANDBOX_INSTALL_TIMEOUT", "180"))
+
 CORS_ORIGINS = [
     origin.strip()
     for origin in os.getenv("SENTINEL_CORS_ORIGINS", "http://localhost:1000").split(",")
@@ -79,6 +85,7 @@ PIPELINE_STAGES = [
     "dependency_scan_complete",
     "risk_analysis_complete",
     "failure_generation_complete",
+    "sandbox_ready",
     "simulation_complete",
     "telemetry_complete",
     "ai_analysis_complete",

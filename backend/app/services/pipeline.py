@@ -19,6 +19,8 @@ from app.models.db import (
     SessionLocal,
     TelemetryBundle,
 )
+from app.sandbox import start_sandbox
+from app.simulators.demo_probes import resolve_probe_targets
 from app.simulators.execution_engine import run_simulation
 from app.simulators.strategy_engine import generate_scenarios
 
@@ -31,6 +33,7 @@ STAGE_PROGRESS = {
     "dependency_scan_complete": 35,
     "risk_analysis_complete": 52,
     "failure_generation_complete": 68,
+    "sandbox_ready": 75,
     "simulation_complete": 82,
     "telemetry_complete": 90,
     "ai_analysis_complete": 100,
@@ -131,14 +134,61 @@ def _run_pipeline(job_id: str, reanalyze: bool) -> None:
             corr,
         )
 
-        telemetry = run_simulation(
-            root,
-            analysis,
-            scenarios,
-            output_dir,
-            job_id=job_id,
-            demo_id=project.demo_id,
-        )
+        sandbox = None
+        probe_targets: list[tuple[str, str]] = []
+        try:
+            sandbox = start_sandbox(root, analysis.framework)
+            if sandbox and sandbox.probe_targets:
+                probe_targets = sandbox.probe_targets
+                _advance(
+                    db,
+                    run,
+                    "sandbox_ready",
+                    f"Sandbox ({sandbox.mode}) live at {sandbox.base_url} — {len(probe_targets)} endpoints",
+                    corr,
+                )
+            elif sandbox:
+                _advance(
+                    db,
+                    run,
+                    "sandbox_ready",
+                    f"Sandbox ({sandbox.mode}) started; warming endpoints",
+                    corr,
+                )
+                probe_targets = resolve_probe_targets(root, project.demo_id, analysis.framework)
+            else:
+                _advance(
+                    db,
+                    run,
+                    "sandbox_ready",
+                    "Sandbox unavailable — using static analysis + synthetic probes",
+                    corr,
+                )
+                probe_targets = resolve_probe_targets(root, project.demo_id, analysis.framework)
+        except Exception as sbx_exc:
+            _advance(
+                db,
+                run,
+                "sandbox_ready",
+                f"Sandbox error: {sbx_exc}",
+                corr,
+            )
+            probe_targets = resolve_probe_targets(root, project.demo_id, analysis.framework)
+
+        try:
+            telemetry = run_simulation(
+                root,
+                analysis,
+                scenarios,
+                output_dir,
+                job_id=job_id,
+                demo_id=project.demo_id,
+                probe_targets=probe_targets,
+                sandbox_mode=sandbox.mode if sandbox else "none",
+            )
+        finally:
+            if sandbox:
+                sandbox.stop()
         for scenario in scenarios:
             existing = (
                 db.query(FailureScenario)

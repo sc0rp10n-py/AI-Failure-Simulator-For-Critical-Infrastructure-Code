@@ -1,0 +1,383 @@
+{
+  "metrics": {
+    "requests_total": 6,
+    "requests_failed": 6,
+    "p50_ms": 7.8,
+    "p95_ms": 1323.7,
+    "p99_ms": 1650.8,
+    "error_rate": 1.0,
+    "live_probes": 6,
+    "synthetic_probes": 0,
+    "sandbox_mode": "docker"
+  },
+  "traces": {
+    "spans": [
+      {
+        "trace_id": "7a455ea9-e96e-4210-87ea-7b6fb65de3f5-0",
+        "span": "External API latency",
+        "duration_ms": 1650.8,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "7a455ea9-e96e-4210-87ea-7b6fb65de3f5-1",
+        "span": "Traffic burst",
+        "duration_ms": 7.8,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "7a455ea9-e96e-4210-87ea-7b6fb65de3f5-2",
+        "span": "Lock contention",
+        "duration_ms": 6.4,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "7a455ea9-e96e-4210-87ea-7b6fb65de3f5-3",
+        "span": "Simulate performance fault",
+        "duration_ms": 5.8,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "7a455ea9-e96e-4210-87ea-7b6fb65de3f5-4",
+        "span": "Simulate external-api fault",
+        "duration_ms": 1323.7,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "7a455ea9-e96e-4210-87ea-7b6fb65de3f5-5",
+        "span": "Simulate concurrency fault",
+        "duration_ms": 7.7,
+        "status": "ERROR"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "ts": 1779042155.8836741,
+      "stage": "simulation",
+      "scenario": "External API latency",
+      "target": "app.py \u2192 dispatch",
+      "category": "external-api",
+      "latency_ms": 1650.8,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "api_delay",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779042155.8919501,
+      "stage": "simulation",
+      "scenario": "Traffic burst",
+      "target": "app.py \u2192 dispatch",
+      "category": "concurrency",
+      "latency_ms": 7.8,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "intermittent",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779042155.898845,
+      "stage": "simulation",
+      "scenario": "Lock contention",
+      "target": "app.py \u2192 dispatch",
+      "category": "concurrency",
+      "latency_ms": 6.4,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "intermittent",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779042155.905008,
+      "stage": "simulation",
+      "scenario": "Simulate performance fault",
+      "target": "app.py \u2192 dispatch",
+      "category": "performance",
+      "latency_ms": 5.8,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "degraded",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779042157.229343,
+      "stage": "simulation",
+      "scenario": "Simulate external-api fault",
+      "target": "app.py \u2192 dispatch",
+      "category": "external-api",
+      "latency_ms": 1323.7,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "api_delay",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779042157.2375748,
+      "stage": "simulation",
+      "scenario": "Simulate concurrency fault",
+      "target": "app.py \u2192 dispatch",
+      "category": "concurrency",
+      "latency_ms": 7.7,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "intermittent",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    }
+  ],
+  "dependency_graph": {
+    "nodes": [
+      {
+        "id": "api",
+        "label": "api",
+        "kind": "service"
+      },
+      {
+        "id": "dispatch",
+        "label": "dispatch",
+        "kind": "service"
+      },
+      {
+        "id": "hospitals",
+        "label": "hospitals",
+        "kind": "service"
+      },
+      {
+        "id": "intake",
+        "label": "intake",
+        "kind": "service"
+      },
+      {
+        "id": "mapping-api",
+        "label": "mapping-api",
+        "kind": "external"
+      }
+    ],
+    "edges": [
+      {
+        "from": "dispatch",
+        "to": "mapping-api",
+        "critical": true
+      },
+      {
+        "from": "api",
+        "to": "dispatch",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "hospitals",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "intake",
+        "critical": false
+      }
+    ]
+  },
+  "blast_radius": {
+    "origin": "app.py \u2192 dispatch",
+    "impacted_services": [
+      "api",
+      "mapping-api"
+    ],
+    "severity": "Medium",
+    "cascade_probability": 0.95,
+    "customer_impact": "checkout/time-critical paths affected"
+  },
+  "heatmap": [
+    {
+      "category": "concurrency",
+      "severity": "High",
+      "weight": 9
+    },
+    {
+      "category": "external-api",
+      "severity": "High",
+      "weight": 6
+    },
+    {
+      "category": "performance",
+      "severity": "High",
+      "weight": 3
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "External API latency",
+      "category": "external-api",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Add 2\u20138s latency to upstream HTTP. Triggered by: Synchronous external HTTP dependency",
+      "related_risk_id": "ext-api-app.py"
+    },
+    {
+      "name": "Traffic burst",
+      "category": "concurrency",
+      "severity": "High",
+      "target": "app.py",
+      "description": "2\u00d7 concurrent requests on hot endpoints. Triggered by: Coarse locking / contention risk",
+      "related_risk_id": "lock-app.py"
+    },
+    {
+      "name": "Lock contention",
+      "category": "concurrency",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Serialize workers on shared lock. Triggered by: Coarse locking / contention risk",
+      "related_risk_id": "lock-app.py"
+    },
+    {
+      "name": "Simulate performance fault",
+      "category": "performance",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Autonomous scenario targeting Blocking sleep in request path",
+      "related_risk_id": "sleep-app.py"
+    },
+    {
+      "name": "Simulate external-api fault",
+      "category": "external-api",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Autonomous scenario targeting Synchronous external HTTP dependency",
+      "related_risk_id": "ext-api-app.py"
+    },
+    {
+      "name": "Simulate concurrency fault",
+      "category": "concurrency",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Autonomous scenario targeting Coarse locking / contention risk",
+      "related_risk_id": "lock-app.py"
+    }
+  ],
+  "logs": [
+    {
+      "level": "ERROR",
+      "message": "[api_delay] External API latency @ app.py \u2192 dispatch: FAIL (1650.8ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779042155.8836741,
+        "stage": "simulation",
+        "scenario": "External API latency",
+        "target": "app.py \u2192 dispatch",
+        "category": "external-api",
+        "latency_ms": 1650.8,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "api_delay",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[intermittent] Traffic burst @ app.py \u2192 dispatch: FAIL (7.8ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779042155.8919501,
+        "stage": "simulation",
+        "scenario": "Traffic burst",
+        "target": "app.py \u2192 dispatch",
+        "category": "concurrency",
+        "latency_ms": 7.8,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "intermittent",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[intermittent] Lock contention @ app.py \u2192 dispatch: FAIL (6.4ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779042155.898845,
+        "stage": "simulation",
+        "scenario": "Lock contention",
+        "target": "app.py \u2192 dispatch",
+        "category": "concurrency",
+        "latency_ms": 6.4,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "intermittent",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[degraded] Simulate performance fault @ app.py \u2192 dispatch: FAIL (5.8ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779042155.905008,
+        "stage": "simulation",
+        "scenario": "Simulate performance fault",
+        "target": "app.py \u2192 dispatch",
+        "category": "performance",
+        "latency_ms": 5.8,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "degraded",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[api_delay] Simulate external-api fault @ app.py \u2192 dispatch: FAIL (1323.7ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779042157.229343,
+        "stage": "simulation",
+        "scenario": "Simulate external-api fault",
+        "target": "app.py \u2192 dispatch",
+        "category": "external-api",
+        "latency_ms": 1323.7,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "api_delay",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[intermittent] Simulate concurrency fault @ app.py \u2192 dispatch: FAIL (7.7ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779042157.2375748,
+        "stage": "simulation",
+        "scenario": "Simulate concurrency fault",
+        "target": "app.py \u2192 dispatch",
+        "category": "concurrency",
+        "latency_ms": 7.7,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "intermittent",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    }
+  ]
+}

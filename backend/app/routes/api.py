@@ -2,10 +2,10 @@ import json
 import time
 from pathlib import Path
 
-from flask import Blueprint, Response, g, jsonify, request
+from flask import Blueprint, Response, current_app, g, jsonify, request
 
 from app.config import settings
-from app.models.db import AnalysisRun, Project
+from app.models.db import AnalysisRun, Project, SessionLocal
 from app.services.cache_service import cache_summary, get_latest_completed_run
 from app.services.pipeline import start_analysis
 from app.services.session_service import with_db
@@ -353,35 +353,51 @@ def logs(job_id: str):
 
 
 @api_bp.get("/stream/logs/<job_id>")
-@with_db
 def stream_logs(job_id: str):
     """Server-Sent Events stream of pipeline logs for a job."""
+    session_id = g.session.id
+    app = current_app._get_current_object()
 
     def generate():
         seen = 0
         idle = 0
         while idle < 30:
-            run = _get_run(job_id)
-            if not run:
-                yield f"data: {json.dumps({'error': 'not_found'})}\n\n"
+            events: list[str] = []
+            with app.app_context():
+                db = SessionLocal()
+                try:
+                    run = _get_run_for_session(db, job_id, session_id)
+                    if not run:
+                        events.append(f"data: {json.dumps({'error': 'not_found'})}\n\n")
+                        idle = 30
+                    else:
+                        logs = run.logs
+                        if len(logs) > seen:
+                            for log in logs[seen:]:
+                                payload = {
+                                    "level": log.level,
+                                    "message": log.message,
+                                    "source": log.source,
+                                    "created_at": log.created_at.isoformat(),
+                                    "payload": log.payload,
+                                }
+                                events.append(f"data: {json.dumps(payload)}\n\n")
+                            seen = len(logs)
+                            idle = 0
+                        if run.status in ("completed", "failed"):
+                            events.append(
+                                f"data: {json.dumps({'done': True, 'status': run.status})}\n\n"
+                            )
+                            idle = 30
+                        else:
+                            idle += 1
+                finally:
+                    db.close()
+
+            for event in events:
+                yield event
+            if idle >= 30:
                 break
-            logs = run.logs
-            if len(logs) > seen:
-                for log in logs[seen:]:
-                    payload = {
-                        "level": log.level,
-                        "message": log.message,
-                        "source": log.source,
-                        "created_at": log.created_at.isoformat(),
-                        "payload": log.payload,
-                    }
-                    yield f"data: {json.dumps(payload)}\n\n"
-                seen = len(logs)
-                idle = 0
-            if run.status in ("completed", "failed"):
-                yield f"data: {json.dumps({'done': True, 'status': run.status})}\n\n"
-                break
-            idle += 1
             time.sleep(0.8)
 
     return Response(
@@ -402,13 +418,17 @@ def metrics(job_id: str):
     return _ok({"metrics": run.telemetry.metrics})
 
 
-def _get_run(job_id: str) -> AnalysisRun | None:
+def _get_run_for_session(db, job_id: str, session_id: int) -> AnalysisRun | None:
     return (
-        g.db.query(AnalysisRun)
+        db.query(AnalysisRun)
         .join(Project)
-        .filter(AnalysisRun.job_id == job_id, Project.session_id == g.session.id)
+        .filter(AnalysisRun.job_id == job_id, Project.session_id == session_id)
         .first()
     )
+
+
+def _get_run(job_id: str) -> AnalysisRun | None:
+    return _get_run_for_session(g.db, job_id, g.session.id)
 
 
 def _demo_response(meta: dict) -> dict:

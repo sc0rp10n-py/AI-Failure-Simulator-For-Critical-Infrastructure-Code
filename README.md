@@ -60,6 +60,18 @@ Session: anonymous HTTP-only cookie `sentinel_session`.
 - Re-running analysis on the same project returns the cached `job_id` unless you pass `force: true` or check **Force fresh analysis** in the UI.
 - `GET /api/projects/:id/cache` returns the latest completed run metadata.
 
+## Automatic sandbox (live injection)
+
+For every upload or demo analysis, SentinelAI **automatically** tries to run the project:
+
+1. **Docker** container (preferred) — isolated `docker run` with deps install + start
+2. **Subprocess** fallback — `npm start` / `uvicorn` / `python app.py` on a free local port
+3. If the project has `docker-compose.yml` (e.g. demo1 Postgres), compose services are started first
+
+Health endpoints are discovered from routes in code, then failure injection runs against **live** URLs. No manual `npm start` required.
+
+Configure via `SENTINEL_SANDBOX_*` in `backend/.env` (see `.env.example`). Requires Docker installed for container isolation.
+
 ## Log streaming
 
 - `GET /api/stream/logs/:job_id` — Server-Sent Events for live pipeline logs (processing + dashboard).

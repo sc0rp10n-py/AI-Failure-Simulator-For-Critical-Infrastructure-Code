@@ -1,0 +1,424 @@
+{
+  "metrics": {
+    "requests_total": 6,
+    "requests_failed": 6,
+    "p50_ms": 3.5,
+    "p95_ms": 3.7,
+    "p99_ms": 3.8,
+    "error_rate": 1.0,
+    "live_probes": 6,
+    "synthetic_probes": 0,
+    "sandbox_mode": "docker"
+  },
+  "traces": {
+    "spans": [
+      {
+        "trace_id": "f560f48f-caef-4c35-a423-ccd8d0e6fbe3-0",
+        "span": "Upstream 500 storm",
+        "duration_ms": 3.7,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "f560f48f-caef-4c35-a423-ccd8d0e6fbe3-1",
+        "span": "Retry storm",
+        "duration_ms": 3.3,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "f560f48f-caef-4c35-a423-ccd8d0e6fbe3-2",
+        "span": "Cascading failure",
+        "duration_ms": 3.5,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "f560f48f-caef-4c35-a423-ccd8d0e6fbe3-3",
+        "span": "Simulate reliability fault",
+        "duration_ms": 3.2,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "f560f48f-caef-4c35-a423-ccd8d0e6fbe3-4",
+        "span": "Simulate reliability fault",
+        "duration_ms": 3.8,
+        "status": "ERROR"
+      },
+      {
+        "trace_id": "f560f48f-caef-4c35-a423-ccd8d0e6fbe3-5",
+        "span": "Simulate reliability fault",
+        "duration_ms": 2.9,
+        "status": "ERROR"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "ts": 1779041903.3286688,
+      "stage": "simulation",
+      "scenario": "Upstream 500 storm",
+      "target": "src/payment-service.js \u2192 api-gateway",
+      "category": "reliability",
+      "latency_ms": 3.7,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "exception",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779041903.3322198,
+      "stage": "simulation",
+      "scenario": "Retry storm",
+      "target": "src/payment-service.js \u2192 payment-service",
+      "category": "reliability",
+      "latency_ms": 3.3,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "intermittent",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779041903.335954,
+      "stage": "simulation",
+      "scenario": "Cascading failure",
+      "target": ". \u2192 inventory-service",
+      "category": "architecture",
+      "latency_ms": 3.5,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "degraded",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779041903.33933,
+      "stage": "simulation",
+      "scenario": "Simulate reliability fault",
+      "target": "src/payment-service.js \u2192 api-gateway",
+      "category": "reliability",
+      "latency_ms": 3.2,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "degraded",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779041903.3433669,
+      "stage": "simulation",
+      "scenario": "Simulate reliability fault",
+      "target": "src/payment-service.js \u2192 payment-service",
+      "category": "reliability",
+      "latency_ms": 3.8,
+      "failed": true,
+      "severity": "Medium",
+      "injection_type": "degraded",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    },
+    {
+      "ts": 1779041903.346476,
+      "stage": "simulation",
+      "scenario": "Simulate reliability fault",
+      "target": "src/gateway.js \u2192 inventory-service",
+      "category": "reliability",
+      "latency_ms": 2.9,
+      "failed": true,
+      "severity": "High",
+      "injection_type": "degraded",
+      "probe_source": "injector:live",
+      "error": "[Errno 61] Connection refused",
+      "status": null
+    }
+  ],
+  "dependency_graph": {
+    "nodes": [
+      {
+        "id": "api",
+        "label": "api",
+        "kind": "service"
+      },
+      {
+        "id": "gateway",
+        "label": "gateway",
+        "kind": "service"
+      },
+      {
+        "id": "inventory",
+        "label": "inventory",
+        "kind": "service"
+      },
+      {
+        "id": "inventory-service",
+        "label": "inventory-service",
+        "kind": "service"
+      },
+      {
+        "id": "mock-payment-provider",
+        "label": "mock-payment-provider",
+        "kind": "service"
+      },
+      {
+        "id": "payment",
+        "label": "payment",
+        "kind": "service"
+      },
+      {
+        "id": "payment-service",
+        "label": "payment-service",
+        "kind": "service"
+      },
+      {
+        "id": "postgresql",
+        "label": "postgresql",
+        "kind": "database"
+      },
+      {
+        "id": "payment-api",
+        "label": "payment-api",
+        "kind": "external"
+      }
+    ],
+    "edges": [
+      {
+        "from": "api",
+        "to": "postgresql",
+        "critical": true
+      },
+      {
+        "from": "api",
+        "to": "payment-api",
+        "critical": true
+      },
+      {
+        "from": "api",
+        "to": "gateway",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "inventory",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "inventory-service",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "mock-payment-provider",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "payment",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "payment-service",
+        "critical": false
+      }
+    ]
+  },
+  "blast_radius": {
+    "origin": "src/payment-service.js \u2192 api-gateway",
+    "impacted_services": [
+      "api",
+      "payment-api",
+      "postgresql"
+    ],
+    "severity": "Critical",
+    "cascade_probability": 0.95,
+    "customer_impact": "checkout/time-critical paths affected"
+  },
+  "heatmap": [
+    {
+      "category": "reliability",
+      "severity": "High",
+      "weight": 12
+    },
+    {
+      "category": "architecture",
+      "severity": "High",
+      "weight": 3
+    },
+    {
+      "category": "reliability",
+      "severity": "Medium",
+      "weight": 3
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Upstream 500 storm",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/payment-service.js",
+      "description": "Return intermittent 500 from dependency. Triggered by: HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/payment-service.js"
+    },
+    {
+      "name": "Retry storm",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/payment-service.js",
+      "description": "Amplify retries when downstream is degraded. Triggered by: HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/payment-service.js"
+    },
+    {
+      "name": "Cascading failure",
+      "category": "architecture",
+      "severity": "High",
+      "target": ".",
+      "description": "Fail gateway when payment+inventory degrade. Triggered by: Deep critical dependency chain",
+      "related_risk_id": "dep-chain"
+    },
+    {
+      "name": "Simulate reliability fault",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/payment-service.js",
+      "description": "Autonomous scenario targeting HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/payment-service.js"
+    },
+    {
+      "name": "Simulate reliability fault",
+      "category": "reliability",
+      "severity": "Medium",
+      "target": "src/payment-service.js",
+      "description": "Autonomous scenario targeting Aggressive downstream timeout",
+      "related_risk_id": "aggressive-timeout-src/payment-service.js"
+    },
+    {
+      "name": "Simulate reliability fault",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/gateway.js",
+      "description": "Autonomous scenario targeting HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/gateway.js"
+    }
+  ],
+  "logs": [
+    {
+      "level": "ERROR",
+      "message": "[exception] Upstream 500 storm @ src/payment-service.js \u2192 api-gateway: FAIL (3.7ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779041903.3286688,
+        "stage": "simulation",
+        "scenario": "Upstream 500 storm",
+        "target": "src/payment-service.js \u2192 api-gateway",
+        "category": "reliability",
+        "latency_ms": 3.7,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "exception",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[intermittent] Retry storm @ src/payment-service.js \u2192 payment-service: FAIL (3.3ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779041903.3322198,
+        "stage": "simulation",
+        "scenario": "Retry storm",
+        "target": "src/payment-service.js \u2192 payment-service",
+        "category": "reliability",
+        "latency_ms": 3.3,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "intermittent",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[degraded] Cascading failure @ . \u2192 inventory-service: FAIL (3.5ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779041903.335954,
+        "stage": "simulation",
+        "scenario": "Cascading failure",
+        "target": ". \u2192 inventory-service",
+        "category": "architecture",
+        "latency_ms": 3.5,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "degraded",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[degraded] Simulate reliability fault @ src/payment-service.js \u2192 api-gateway: FAIL (3.2ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779041903.33933,
+        "stage": "simulation",
+        "scenario": "Simulate reliability fault",
+        "target": "src/payment-service.js \u2192 api-gateway",
+        "category": "reliability",
+        "latency_ms": 3.2,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "degraded",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[degraded] Simulate reliability fault @ src/payment-service.js \u2192 payment-service: FAIL (3.8ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779041903.3433669,
+        "stage": "simulation",
+        "scenario": "Simulate reliability fault",
+        "target": "src/payment-service.js \u2192 payment-service",
+        "category": "reliability",
+        "latency_ms": 3.8,
+        "failed": true,
+        "severity": "Medium",
+        "injection_type": "degraded",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    },
+    {
+      "level": "ERROR",
+      "message": "[degraded] Simulate reliability fault @ src/gateway.js \u2192 inventory-service: FAIL (2.9ms)",
+      "source": "injector:live",
+      "payload": {
+        "ts": 1779041903.346476,
+        "stage": "simulation",
+        "scenario": "Simulate reliability fault",
+        "target": "src/gateway.js \u2192 inventory-service",
+        "category": "reliability",
+        "latency_ms": 2.9,
+        "failed": true,
+        "severity": "High",
+        "injection_type": "degraded",
+        "probe_source": "injector:live",
+        "error": "[Errno 61] Connection refused",
+        "status": null
+      }
+    }
+  ]
+}

@@ -29,6 +29,16 @@ Correlation: response header `X-Correlation-ID` on all requests
 | GET | `/logs/:job_id` | all logs |
 | GET | `/metrics/:job_id` | metrics only |
 
+## Automatic sandbox
+
+Before simulation, the pipeline starts the uploaded project automatically:
+
+- Docker container (if Docker is installed and `SENTINEL_SANDBOX_PREFER_DOCKER=true`)
+- Otherwise a managed subprocess on a free port
+- Optional `docker compose up` when `docker-compose.yml` exists
+
+Progress stage: `sandbox_ready`. Telemetry includes `metrics.sandbox_mode` (`docker` | `subprocess` | `none`).
+
 ## Analyze cache
 
 - `use_cache: true` (default) returns existing completed `job_id` if present.

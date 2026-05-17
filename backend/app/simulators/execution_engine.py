@@ -18,10 +18,15 @@ def run_simulation(
     *,
     job_id: str,
     demo_id: str | None = None,
+    probe_targets: list[tuple[str, str]] | None = None,
+    sandbox_mode: str = "none",
 ) -> dict:
     collector = TelemetryCollector(job_id, output_dir)
-    probes = resolve_probe_targets(root, demo_id, analysis.framework)
+    collector.metrics["sandbox_mode"] = sandbox_mode
+    probes = probe_targets or resolve_probe_targets(root, demo_id, analysis.framework)
     live_probes = [(url, name) for url, name in probes if is_endpoint_live(url)]
+    if probe_targets and not live_probes:
+        live_probes = probe_targets
 
     for idx, scenario in enumerate(scenarios):
         injector = FailureInjector(scenario, seed=hash(job_id) + idx)
