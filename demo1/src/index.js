@@ -1,4 +1,4 @@
-const { createPool, initDatabase } = require('./db');
+const { createPool, ensureDatabaseExists, initDatabase, waitForPostgres } = require('./db');
 const { startGateway } = require('./gateway');
 const { startPaymentService } = require('./payment-service');
 const { startInventoryService } = require('./inventory-service');
@@ -7,8 +7,10 @@ const { createLogger } = require('./logger');
 
 async function main() {
   const logger = createLogger('bootstrap');
-  const pool = createPool();
+  await waitForPostgres();
+  await ensureDatabaseExists();
 
+  const pool = createPool();
   await initDatabase(pool);
 
   startMockPaymentProvider();
@@ -17,7 +19,7 @@ async function main() {
   startGateway();
 
   logger.info('demo1 stack booted', {
-    databaseUrl: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/sentinel_demo1',
+    databaseUrl: process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5433/sentinel_demo1',
     gatewayPort: Number(process.env.GATEWAY_PORT || 3000),
     paymentPort: Number(process.env.PAYMENT_PORT || 3001),
     inventoryPort: Number(process.env.INVENTORY_PORT || 3002),

@@ -56,7 +56,7 @@ function startMockPaymentProvider() {
   const port = Number(process.env.PAYMENT_PROVIDER_PORT || 3003);
   const app = buildMockPaymentProvider();
 
-  return app.listen(port, () => {
+  return app.listen(port, '0.0.0.0', () => {
     createLogger('payment-provider').info('mock payment provider started', { port });
   });
 }

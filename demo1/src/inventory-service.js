@@ -129,7 +129,7 @@ function startInventoryService(pool) {
   const port = Number(process.env.INVENTORY_PORT || 3002);
   const app = buildInventoryService(pool);
 
-  return app.listen(port, () => {
+  return app.listen(port, '0.0.0.0', () => {
     createLogger('inventory-service').info('inventory service started', { port });
   });
 }

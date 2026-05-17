@@ -113,7 +113,7 @@ function startGateway() {
   const port = Number(process.env.GATEWAY_PORT || 3000);
   const app = buildGateway();
 
-  return app.listen(port, () => {
+  return app.listen(port, '0.0.0.0', () => {
     createLogger('api-gateway').info('gateway started', { port });
   });
 }

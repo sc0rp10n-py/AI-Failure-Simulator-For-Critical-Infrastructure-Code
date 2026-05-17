@@ -12,6 +12,7 @@ import httpx
 from app.config import settings
 from app.sandbox.port import pick_free_port
 from app.sandbox.profiles import discover_health_paths, profile_for
+from app.sandbox.subprocess_runner import _maybe_start_compose, _stop_compose
 from app.sandbox.types import SandboxHandle
 
 
@@ -26,7 +27,7 @@ def _wait_health(base_url: str, paths: list[str], timeout: float) -> list[tuple[
         for path in paths:
             url = f"{base_url}{path}"
             try:
-                if httpx.get(url, timeout=2.0).status_code < 500:
+                if 200 <= httpx.get(url, timeout=2.0).status_code < 400:
                     live.append((url, path.strip("/") or "api"))
             except Exception:
                 continue
@@ -47,10 +48,38 @@ def start(root: Path, framework: str) -> SandboxHandle:
     if framework == "fastapi":
         container_port = 8000
 
+    compose_started = False
+    if settings.SANDBOX_USE_COMPOSE and (root / "docker-compose.yml").exists():
+        try:
+            _maybe_start_compose(root)
+            compose_started = True
+        except Exception:
+            compose_started = False
+
     if framework in ("express", "nodejs"):
         image = "node:20-alpine"
         shell_cmd = "npm install --omit=dev && npm start"
-        env_args = ["-e", f"PORT={container_port}", "-e", f"GATEWAY_PORT={container_port}"]
+        env_args = [
+            "-e",
+            f"PORT={container_port}",
+            "-e",
+            f"GATEWAY_PORT={container_port}",
+        ]
+        if (root / "docker-compose.yml").exists():
+            env_args.extend(
+                [
+                    "-e",
+                    "DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5433/sentinel_demo1",
+                    "-e",
+                    "PAYMENT_PORT=3001",
+                    "-e",
+                    "INVENTORY_PORT=3002",
+                    "-e",
+                    "PAYMENT_PROVIDER_PORT=3003",
+                    "--add-host",
+                    "host.docker.internal:host-gateway",
+                ]
+            )
     elif framework == "fastapi":
         image = "python:3.12-slim"
         shell_cmd = "pip install -r requirements.txt && uvicorn app:app --host 0.0.0.0 --port 8000"
@@ -59,7 +88,7 @@ def start(root: Path, framework: str) -> SandboxHandle:
     else:
         image = "python:3.12-slim"
         shell_cmd = "pip install -r requirements.txt && python app.py"
-        env_args = ["-e", f"PORT={container_port}"]
+        env_args = ["-e", f"PORT={container_port}", "-e", "FLASK_DEBUG=0"]
 
     name = f"sentinel-sbx-{host_port}"
     cmd = [
@@ -109,6 +138,11 @@ def start(root: Path, framework: str) -> SandboxHandle:
 
     def cleanup() -> None:
         subprocess.run(["docker", "rm", "-f", name], capture_output=True, timeout=30)
+        if compose_started:
+            try:
+                _stop_compose(root)
+            except Exception:
+                pass
 
     return SandboxHandle(
         mode="docker",

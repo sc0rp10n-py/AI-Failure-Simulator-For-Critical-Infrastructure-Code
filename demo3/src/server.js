@@ -20,13 +20,17 @@ app.get('/control/status', (req, res) => {
   res.json(control.status());
 });
 
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, service: 'demo3-smart-grid', ...control.status() });
+});
+
 // Alerts
 app.get('/alerts', (req, res) => {
   res.json(alerting.recent(50));
 });
 
 const port = process.env.PORT || 4003;
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`demo3 smart-grid backend listening on ${port}`);
   // Start detector after server is up
   detector.startDetector({ intervalMs: 150 });

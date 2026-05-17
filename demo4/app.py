@@ -478,4 +478,5 @@ def handle_error(exc: Exception) -> tuple[Any, int]:
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "5004"))
-    app.run(host="0.0.0.0", port=port, debug=True, threaded=True)
+    debug = os.getenv("FLASK_DEBUG", "1").lower() in ("1", "true", "yes")
+    app.run(host="0.0.0.0", port=port, debug=debug, threaded=True)

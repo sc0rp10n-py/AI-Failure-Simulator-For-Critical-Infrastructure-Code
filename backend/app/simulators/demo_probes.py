@@ -19,6 +19,7 @@ DEMO_PROBE_MAP: dict[str, list[tuple[str, str]]] = {
         ("http://127.0.0.1:8000/health", "dispatch"),
     ],
     "demo3": [
+        ("http://127.0.0.1:4003/health", "smart-grid"),
         ("http://127.0.0.1:4003/control/status", "control-center"),
     ],
     "demo4": [
@@ -50,6 +51,6 @@ def resolve_probe_targets(root: Path, demo_id: str | None, framework: str) -> li
 def is_endpoint_live(url: str, timeout: float = 1.5) -> bool:
     try:
         response = httpx.get(url, timeout=timeout)
-        return response.status_code < 500
+        return 200 <= response.status_code < 400
     except Exception:
         return False

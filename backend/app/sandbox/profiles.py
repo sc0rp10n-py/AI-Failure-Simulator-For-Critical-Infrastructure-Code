@@ -52,7 +52,7 @@ def profile_for(framework: str, root: Path, host_port: int) -> SandboxProfile:
             health_paths=["/health", "/healthz"],
             install_cmd=["pip", "install", "-r", "requirements.txt"],
             start_cmd=["python", entry],
-            env_keys={"PORT": str(host_port)},
+            env_keys={"PORT": str(host_port), "FLASK_DEBUG": "0"},
         )
     return SandboxProfile(
         framework="generic",

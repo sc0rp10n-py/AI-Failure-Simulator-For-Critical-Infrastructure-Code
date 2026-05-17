@@ -112,7 +112,7 @@ function startPaymentService(pool) {
   const port = Number(process.env.PAYMENT_PORT || 3001);
   const app = buildPaymentService(pool);
 
-  return app.listen(port, () => {
+  return app.listen(port, '0.0.0.0', () => {
     createLogger('payment-service').info('payment service started', { port });
   });
 }

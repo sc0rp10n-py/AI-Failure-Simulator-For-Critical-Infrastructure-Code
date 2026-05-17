@@ -8,7 +8,7 @@ Theme: e-commerce payment microservice.
 - Payment Service on `:3001`
 - Inventory Service on `:3002`
 - Mock payment provider on `:3003`
-- PostgreSQL at `DATABASE_URL`
+- PostgreSQL at `DATABASE_URL` (default host port `5433` via `docker-compose.yml` to avoid clashing with a local Postgres on `5432`)
 
 ## Intentional Weaknesses
 
@@ -25,8 +25,8 @@ Theme: e-commerce payment microservice.
 
 ## Run It
 
-1. Start PostgreSQL with the included `docker-compose.yml`.
-2. Set `DATABASE_URL` if needed.
+1. Start PostgreSQL with `docker compose up -d` (maps host `5433` → container `5432`).
+2. Set `DATABASE_URL` if needed (default `postgres://postgres:postgres@127.0.0.1:5433/sentinel_demo1`).
 3. Install dependencies with `npm install`.
 4. Start the stack with `npm start`.
 

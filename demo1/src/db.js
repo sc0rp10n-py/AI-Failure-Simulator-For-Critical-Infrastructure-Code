@@ -1,4 +1,11 @@
-const { Pool } = require('pg');
+const { Pool, Client } = require('pg');
+
+function defaultDatabaseUrl() {
+  return (
+    process.env.DATABASE_URL ||
+    'postgres://postgres:postgres@127.0.0.1:5433/sentinel_demo1'
+  );
+}
 
 const defaultStock = [
   ['tee-black-m', 24],
@@ -8,9 +15,55 @@ const defaultStock = [
 ];
 
 function createPool() {
-  return new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/sentinel_demo1',
+  const pool = new Pool({
+    connectionString: defaultDatabaseUrl(),
   });
+  pool.on('error', () => {
+    // Ignore idle client errors during sandbox teardown / compose restarts.
+  });
+  return pool;
+}
+
+function adminConnectionString() {
+  const url = new URL(defaultDatabaseUrl().replace(/^postgres:\/\//, 'postgresql://'));
+  url.pathname = '/postgres';
+  return url.toString();
+}
+
+async function waitForPostgres({ attempts = 30, delayMs = 1000 } = {}) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const client = new Client({ connectionString: adminConnectionString() });
+    try {
+      await client.connect();
+      await client.query('SELECT 1');
+      return;
+    } catch (error) {
+      if (attempt === attempts) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    } finally {
+      await client.end().catch(() => {});
+    }
+  }
+}
+
+async function ensureDatabaseExists() {
+  const target = new URL(defaultDatabaseUrl().replace(/^postgres:\/\//, 'postgresql://'));
+  const dbName = decodeURIComponent(target.pathname.replace(/^\//, ''));
+  if (!/^[a-zA-Z0-9_]+$/.test(dbName)) {
+    throw new Error(`unsupported database name: ${dbName}`);
+  }
+  const client = new Client({ connectionString: adminConnectionString() });
+  await client.connect();
+  try {
+    const existing = await client.query('SELECT 1 FROM pg_database WHERE datname = $1', [dbName]);
+    if (existing.rowCount === 0) {
+      await client.query(`CREATE DATABASE ${dbName}`);
+    }
+  } finally {
+    await client.end();
+  }
 }
 
 async function initDatabase(pool) {
@@ -71,6 +124,8 @@ async function withTransaction(pool, callback) {
 
 module.exports = {
   createPool,
+  ensureDatabaseExists,
+  waitForPostgres,
   initDatabase,
   withTransaction,
 };

@@ -24,7 +24,7 @@ def _wait_for_health(base_url: str, paths: list[str], timeout: float) -> list[tu
             url = f"{base_url.rstrip('/')}{path}"
             try:
                 response = httpx.get(url, timeout=2.0)
-                if response.status_code < 500:
+                if 200 <= response.status_code < 400:
                     name = path.strip("/").replace("/", "-") or "api"
                     live.append((url, name))
             except Exception:
@@ -72,8 +72,12 @@ def start(root: Path, framework: str) -> SandboxHandle:
     if (root / "package.json").exists() and framework in ("express", "nodejs"):
         env.setdefault(
             "DATABASE_URL",
-            "postgresql://postgres:postgres@127.0.0.1:5432/sentinel_demo1",
+            "postgresql://postgres:postgres@127.0.0.1:5433/sentinel_demo1",
         )
+        if (root / "docker-compose.yml").exists():
+            env.setdefault("PAYMENT_PORT", "3001")
+            env.setdefault("INVENTORY_PORT", "3002")
+            env.setdefault("PAYMENT_PROVIDER_PORT", "3003")
 
     compose_started = False
     if settings.SANDBOX_USE_COMPOSE:
