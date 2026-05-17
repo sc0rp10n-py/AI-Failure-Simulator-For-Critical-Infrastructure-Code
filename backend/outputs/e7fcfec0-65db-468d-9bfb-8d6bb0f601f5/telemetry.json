@@ -1,0 +1,247 @@
+{
+  "metrics": {
+    "requests_total": 136,
+    "requests_failed": 17,
+    "p50_ms": 2325.9,
+    "p95_ms": 2466.2,
+    "p99_ms": 3431.3,
+    "error_rate": 0.125
+  },
+  "traces": {
+    "spans": [
+      {
+        "ts": 1779038931.880657,
+        "stage": "simulation",
+        "scenario": "External API latency",
+        "target": "app.py",
+        "latency_ms": 3431.3,
+        "failed": true,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038932.280657,
+        "stage": "simulation",
+        "scenario": "Traffic burst",
+        "target": "app.py",
+        "latency_ms": 2325.9,
+        "failed": true,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038932.680657,
+        "stage": "simulation",
+        "scenario": "Lock contention",
+        "target": "app.py",
+        "latency_ms": 1891.1,
+        "failed": false,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038933.080657,
+        "stage": "simulation",
+        "scenario": "Simulate performance fault",
+        "target": "app.py",
+        "latency_ms": 2112.9,
+        "failed": false,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038933.4806569,
+        "stage": "simulation",
+        "scenario": "Simulate external-api fault",
+        "target": "app.py",
+        "latency_ms": 2466.2,
+        "failed": false,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038933.880657,
+        "stage": "simulation",
+        "scenario": "Simulate concurrency fault",
+        "target": "app.py",
+        "latency_ms": 2210.0,
+        "failed": false,
+        "severity": "High"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "ts": 1779038931.880657,
+      "stage": "simulation",
+      "scenario": "External API latency",
+      "target": "app.py",
+      "latency_ms": 3431.3,
+      "failed": true,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038932.280657,
+      "stage": "simulation",
+      "scenario": "Traffic burst",
+      "target": "app.py",
+      "latency_ms": 2325.9,
+      "failed": true,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038932.680657,
+      "stage": "simulation",
+      "scenario": "Lock contention",
+      "target": "app.py",
+      "latency_ms": 1891.1,
+      "failed": false,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038933.080657,
+      "stage": "simulation",
+      "scenario": "Simulate performance fault",
+      "target": "app.py",
+      "latency_ms": 2112.9,
+      "failed": false,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038933.4806569,
+      "stage": "simulation",
+      "scenario": "Simulate external-api fault",
+      "target": "app.py",
+      "latency_ms": 2466.2,
+      "failed": false,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038933.880657,
+      "stage": "simulation",
+      "scenario": "Simulate concurrency fault",
+      "target": "app.py",
+      "latency_ms": 2210.0,
+      "failed": false,
+      "severity": "High"
+    }
+  ],
+  "dependency_graph": {
+    "nodes": [
+      {
+        "id": "api",
+        "label": "api",
+        "kind": "service"
+      },
+      {
+        "id": "dispatch",
+        "label": "dispatch",
+        "kind": "service"
+      },
+      {
+        "id": "hospitals",
+        "label": "hospitals",
+        "kind": "service"
+      },
+      {
+        "id": "intake",
+        "label": "intake",
+        "kind": "service"
+      },
+      {
+        "id": "mapping-api",
+        "label": "mapping-api",
+        "kind": "external"
+      }
+    ],
+    "edges": [
+      {
+        "from": "dispatch",
+        "to": "mapping-api",
+        "critical": true
+      },
+      {
+        "from": "api",
+        "to": "dispatch",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "hospitals",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "intake",
+        "critical": false
+      }
+    ]
+  },
+  "blast_radius": {
+    "origin": "app.py",
+    "impacted_services": [
+      "api",
+      "mapping-api"
+    ],
+    "severity": "Medium",
+    "cascade_probability": 0.59,
+    "customer_impact": "checkout/time-critical paths affected"
+  },
+  "scenarios": [
+    {
+      "name": "External API latency",
+      "category": "external-api",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Add 2\u20138s latency to upstream HTTP. Triggered by: Synchronous external HTTP dependency",
+      "related_risk_id": "ext-api-app.py",
+      "injected": true,
+      "outcome": "failed"
+    },
+    {
+      "name": "Traffic burst",
+      "category": "concurrency",
+      "severity": "High",
+      "target": "app.py",
+      "description": "2\u00d7 concurrent requests on hot endpoints. Triggered by: Coarse locking / contention risk",
+      "related_risk_id": "lock-app.py",
+      "injected": true,
+      "outcome": "failed"
+    },
+    {
+      "name": "Lock contention",
+      "category": "concurrency",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Serialize workers on shared lock. Triggered by: Coarse locking / contention risk",
+      "related_risk_id": "lock-app.py",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Simulate performance fault",
+      "category": "performance",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Autonomous scenario targeting Blocking sleep in request path",
+      "related_risk_id": "sleep-app.py",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Simulate external-api fault",
+      "category": "external-api",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Autonomous scenario targeting Synchronous external HTTP dependency",
+      "related_risk_id": "ext-api-app.py",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Simulate concurrency fault",
+      "category": "concurrency",
+      "severity": "High",
+      "target": "app.py",
+      "description": "Autonomous scenario targeting Coarse locking / contention risk",
+      "related_risk_id": "lock-app.py",
+      "injected": true,
+      "outcome": "degraded"
+    }
+  ]
+}

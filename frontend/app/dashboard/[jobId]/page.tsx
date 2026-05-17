@@ -188,9 +188,9 @@ export default function DashboardPage() {
             <CardTitle>Injected failure scenarios</CardTitle>
           </CardHeader>
           <div className="grid gap-3 md:grid-cols-2">
-            {data.scenarios.map((s) => (
+            {data.scenarios.map((s, index) => (
               <div
-                key={s.name}
+                key={`${s.name}-${s.target}-${s.category}-${index}`}
                 className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm"
               >
                 <p className="font-medium text-white">{s.name}</p>

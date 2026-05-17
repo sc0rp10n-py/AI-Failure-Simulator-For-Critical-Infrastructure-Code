@@ -1,0 +1,117 @@
+{
+  "metrics": {
+    "requests_total": 19,
+    "requests_failed": 0,
+    "p50_ms": 208.5,
+    "p95_ms": 208.5,
+    "p99_ms": 208.5,
+    "error_rate": 0.0
+  },
+  "traces": {
+    "spans": [
+      {
+        "ts": 1779039686.484253,
+        "stage": "simulation",
+        "scenario": "Simulate performance fault",
+        "target": ".",
+        "latency_ms": 208.5,
+        "failed": false,
+        "severity": "Medium"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "ts": 1779039686.484253,
+      "stage": "simulation",
+      "scenario": "Simulate performance fault",
+      "target": ".",
+      "latency_ms": 208.5,
+      "failed": false,
+      "severity": "Medium"
+    }
+  ],
+  "dependency_graph": {
+    "nodes": [
+      {
+        "id": "api",
+        "label": "api",
+        "kind": "service"
+      },
+      {
+        "id": "alerting",
+        "label": "alerting",
+        "kind": "service"
+      },
+      {
+        "id": "gateway",
+        "label": "gateway",
+        "kind": "service"
+      },
+      {
+        "id": "inventory",
+        "label": "inventory",
+        "kind": "service"
+      },
+      {
+        "id": "payment",
+        "label": "payment",
+        "kind": "service"
+      },
+      {
+        "id": "payment-api",
+        "label": "payment-api",
+        "kind": "external"
+      }
+    ],
+    "edges": [
+      {
+        "from": "api",
+        "to": "payment-api",
+        "critical": true
+      },
+      {
+        "from": "api",
+        "to": "alerting",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "gateway",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "inventory",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "payment",
+        "critical": false
+      }
+    ]
+  },
+  "blast_radius": {
+    "origin": "api",
+    "impacted_services": [
+      "api",
+      "payment-api"
+    ],
+    "severity": "Low",
+    "cascade_probability": 0.35,
+    "customer_impact": "localized degradation"
+  },
+  "scenarios": [
+    {
+      "name": "Simulate performance fault",
+      "category": "performance",
+      "severity": "Medium",
+      "target": ".",
+      "description": "Autonomous scenario targeting Synchronous Express request path",
+      "related_risk_id": "express-sync",
+      "injected": true,
+      "outcome": "degraded"
+    }
+  ]
+}

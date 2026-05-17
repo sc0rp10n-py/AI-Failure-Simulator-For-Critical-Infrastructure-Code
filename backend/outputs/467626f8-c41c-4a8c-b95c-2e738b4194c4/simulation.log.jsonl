@@ -1,0 +1,1 @@
+{"level": "WARN", "message": "Injection 'Simulate performance fault' on .: DEGRADED (208ms)", "source": "injector", "payload": {"ts": 1779039686.484253, "stage": "simulation", "scenario": "Simulate performance fault", "target": ".", "latency_ms": 208.5, "failed": false, "severity": "Medium"}}
