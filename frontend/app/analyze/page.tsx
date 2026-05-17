@@ -6,15 +6,18 @@ import { AlertCircle, History, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { api, type DemoMeta, type HistoryItem } from "@/lib/api";
+import { useSentinelStore } from "@/lib/store";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function AnalyzePage() {
   const router = useRouter();
+  const setActiveJob = useSentinelStore((s) => s.setActiveJob);
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [forceNew, setForceNew] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["projects"],
@@ -22,8 +25,13 @@ export default function AnalyzePage() {
   });
 
   const analyzeMutation = useMutation({
-    mutationFn: (body: { project_id?: number; demo_id?: string }) => api.analyze(body),
-    onSuccess: (res) => router.push(`/processing/${res.job_id}`),
+    mutationFn: (body: { project_id?: number; demo_id?: string }) =>
+      api.analyze({ ...body, use_cache: !forceNew, force: forceNew }),
+    onSuccess: (res) => {
+      setActiveJob(res.job_id);
+      if (res.cached) router.push(`/dashboard/${res.job_id}`);
+      else router.push(`/processing/${res.job_id}`);
+    },
     onError: (err: Error) => setError(err.message),
   });
 
@@ -32,8 +40,14 @@ export default function AnalyzePage() {
     setUploading(true);
     try {
       const { project } = await api.uploadProject(file);
-      const run = await api.analyze({ project_id: project.id });
-      router.push(`/processing/${run.job_id}`);
+      const run = await api.analyze({
+        project_id: project.id,
+        use_cache: !forceNew,
+        force: forceNew,
+      });
+      setActiveJob(run.job_id);
+      if (run.cached) router.push(`/dashboard/${run.job_id}`);
+      else router.push(`/processing/${run.job_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -58,6 +72,16 @@ export default function AnalyzePage() {
             {error}
           </div>
         ) : null}
+
+        <label className="mb-6 flex items-center gap-2 text-sm text-zinc-400">
+          <input
+            type="checkbox"
+            checked={forceNew}
+            onChange={(e) => setForceNew(e.target.checked)}
+            className="rounded border-white/20"
+          />
+          Force fresh analysis (skip cache)
+        </label>
 
         <Card className="mb-10 border-dashed border-cyan-500/40">
           <CardHeader>

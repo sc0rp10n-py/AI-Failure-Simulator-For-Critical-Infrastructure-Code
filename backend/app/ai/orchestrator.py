@@ -18,17 +18,30 @@ def build_ai_report(
         "timeline": telemetry.get("timeline", [])[:10],
     }
 
-    llm = provider.analyze_with_llm("root_cause", context)
-    if llm:
-        return llm
+    risk_llm = provider.analyze_with_llm("risk_analysis", context)
+    root_llm = provider.analyze_with_llm("root_cause", context)
+    blast_llm = provider.analyze_with_llm("blast_radius", context)
+    remediation_llm = provider.analyze_with_llm("remediation", context)
+
+    if root_llm:
+        report = {**root_llm}
+        if blast_llm:
+            report["blast_radius"] = blast_llm
+        if remediation_llm and remediation_llm.get("remediation"):
+            report["remediation"] = remediation_llm["remediation"]
+        if risk_llm and risk_llm.get("architecture_insights"):
+            report["architecture_insights"] = risk_llm["architecture_insights"]
+        return report
 
     top = analysis.risks[:3]
     root = top[0].title if top else "Unknown weak point"
-    remediation = [
-        f"Add retries and timeouts around {r.category} in {r.file}" for r in top
-    ]
-    remediation.append("Introduce idempotency keys on write paths")
-    remediation.append("Add circuit breakers on external HTTP dependencies")
+    remediation = [f"Add retries and timeouts around {r.category} in {r.file}" for r in top]
+    remediation.extend(
+        [
+            "Introduce idempotency keys on write paths",
+            "Add circuit breakers on external HTTP dependencies",
+        ]
+    )
 
     return {
         "root_cause": (

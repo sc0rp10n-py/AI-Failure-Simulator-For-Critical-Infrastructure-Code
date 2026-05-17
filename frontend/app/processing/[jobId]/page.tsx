@@ -3,15 +3,19 @@
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { api } from "@/lib/api";
+import { MetricsSparkline } from "@/components/processing/metrics-sparkline";
+import { NetworkActivity, PulsingLoader } from "@/components/processing/network-activity";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
+import { useSentinelStore } from "@/lib/store";
+import { streamJobLogs, type LogEvent } from "@/lib/sse";
 
 const STAGE_LABELS: Record<string, string> = {
   queued: "Queued",
-  upload_complete: "Upload complete",
+  upload_complete: "Scanning codebase",
   extraction_complete: "Extracting project",
   dependency_scan_complete: "Mapping dependencies",
   risk_analysis_complete: "Detecting risks",
@@ -35,6 +39,9 @@ const ORDER = [
 export default function ProcessingPage() {
   const { jobId } = useParams<{ jobId: string }>();
   const router = useRouter();
+  const setActiveJob = useSentinelStore((s) => s.setActiveJob);
+  const setJobStatus = useSentinelStore((s) => s.setJobStatus);
+  const [streamLogs, setStreamLogs] = useState<LogEvent[]>([]);
 
   const { data } = useQuery({
     queryKey: ["status", jobId],
@@ -46,23 +53,45 @@ export default function ProcessingPage() {
   });
 
   useEffect(() => {
+    setActiveJob(jobId);
+    if (data) setJobStatus(data);
+  }, [jobId, data, setActiveJob, setJobStatus]);
+
+  useEffect(() => {
+    const stop = streamJobLogs(jobId, (event) => {
+      if (event.done) return;
+      if (event.message) setStreamLogs((prev) => [...prev.slice(-40), event]);
+    });
+    return stop;
+  }, [jobId]);
+
+  useEffect(() => {
     if (data?.status === "completed") {
       router.replace(`/dashboard/${jobId}`);
     }
   }, [data?.status, jobId, router]);
 
   const currentIdx = ORDER.indexOf(data?.stage ?? "");
+  const allLogs = [
+    ...(data?.logs ?? []),
+    ...streamLogs.map((l) => ({
+      level: l.level ?? "INFO",
+      message: l.message ?? "",
+      source: l.source ?? "stream",
+      created_at: l.created_at ?? "",
+    })),
+  ];
 
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-6 pt-28 pb-20">
+      <main className="mx-auto max-w-6xl px-6 pt-28 pb-20">
         <h1 className="text-3xl font-semibold text-white">Autonomous analysis pipeline</h1>
-        <p className="mt-2 text-zinc-400">Live orchestration driven by backend progress events.</p>
+        <PulsingLoader label={STAGE_LABELS[data?.stage ?? "queued"] ?? "Orchestrating…"} />
 
-        <div className="mt-8">
+        <motion.div className="mt-8">
           <div className="mb-2 flex justify-between text-sm">
-            <span className="text-zinc-400">{STAGE_LABELS[data?.stage ?? "queued"] ?? data?.stage}</span>
+            <span className="text-zinc-400">{STAGE_LABELS[data?.stage ?? "queued"]}</span>
             <span className="text-cyan-300">{Math.round(data?.progress ?? 0)}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-white/10">
@@ -73,10 +102,11 @@ export default function ProcessingPage() {
               transition={{ duration: 0.4 }}
             />
           </div>
-        </div>
+          <MetricsSparkline progress={data?.progress ?? 0} logs={allLogs.length} />
+        </motion.div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2">
-          <Card>
+        <div className="mt-10 grid gap-4 lg:grid-cols-3">
+          <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle>Pipeline stages</CardTitle>
             </CardHeader>
@@ -99,19 +129,23 @@ export default function ProcessingPage() {
             </ul>
           </Card>
 
-          <Card>
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle>Network activity</CardTitle>
+            </CardHeader>
+            <NetworkActivity nodeCount={6 + currentIdx} />
+          </Card>
+
+          <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle>Live terminal</CardTitle>
             </CardHeader>
             <div className="max-h-80 overflow-y-auto rounded-lg bg-black/60 p-3 font-mono text-xs text-emerald-300/90">
-              {(data?.logs ?? []).map((log, i) => (
+              {allLogs.map((log, i) => (
                 <div key={`${log.created_at}-${i}`} className="mb-1">
                   <span className="text-zinc-500">[{log.level}]</span> {log.message}
                 </div>
               ))}
-              {data?.status === "failed" && (
-                <p className="text-red-400">Pipeline failed. Check backend logs.</p>
-              )}
             </div>
           </Card>
         </div>

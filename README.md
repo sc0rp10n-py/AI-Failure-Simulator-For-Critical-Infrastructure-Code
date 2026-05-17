@@ -55,12 +55,21 @@ Demo catalog cards work when `demo1`…`demo4` folders exist at the repo root; o
 
 Session: anonymous HTTP-only cookie `sentinel_session`.
 
+## Analysis cache
+
+- Re-running analysis on the same project returns the cached `job_id` unless you pass `force: true` or check **Force fresh analysis** in the UI.
+- `GET /api/projects/:id/cache` returns the latest completed run metadata.
+
+## Log streaming
+
+- `GET /api/stream/logs/:job_id` — Server-Sent Events for live pipeline logs (processing + dashboard).
+
 ## AI providers
 
 Set in `backend/.env`:
 
 - `SENTINEL_LLM_PROVIDER=heuristic` (default, no external API)
-- `SENTINEL_LLM_PROVIDER=ollama` + Ollama URL/model
+- `SENTINEL_LLM_PROVIDER=ollama` + Ollama URL/model (e.g. `gemma2:2b` via `SENTINEL_OLLAMA_MODEL`)
 - `SENTINEL_LLM_PROVIDER=openai` + API key
 
 ## Project layout

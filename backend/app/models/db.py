@@ -55,6 +55,7 @@ class AnalysisRun(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     job_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    correlation_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"))
     status: Mapped[str] = mapped_column(String(32), default="queued")
     current_stage: Mapped[str] = mapped_column(String(64), default="queued")
@@ -144,6 +145,21 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 def init_db() -> None:
     Base.metadata.create_all(engine)
+    _migrate_sqlite()
+
+
+def _migrate_sqlite() -> None:
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(engine)
+    if "analysis_runs" not in inspector.get_table_names():
+        return
+    columns = {c["name"] for c in inspector.get_columns("analysis_runs")}
+    if "correlation_id" not in columns:
+        with engine.begin() as conn:
+            conn.execute(
+                text("ALTER TABLE analysis_runs ADD COLUMN correlation_id VARCHAR(64)")
+            )
 
 
 def get_db():

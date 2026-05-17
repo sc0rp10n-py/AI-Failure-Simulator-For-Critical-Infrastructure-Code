@@ -1,10 +1,12 @@
-from datetime import datetime, timezone
+import json
+import time
 from pathlib import Path
 
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, Response, g, jsonify, request
 
 from app.config import settings
 from app.models.db import AnalysisRun, Project
+from app.services.cache_service import cache_summary, get_latest_completed_run
 from app.services.pipeline import start_analysis
 from app.services.session_service import with_db
 from app.services.upload_service import UploadError, store_upload
@@ -101,6 +103,22 @@ def get_project(project_id: int):
     return _ok({"project": _project_dict(project, g.db)})
 
 
+@api_bp.get("/projects/<int:project_id>/cache")
+@with_db
+def project_cache(project_id: int):
+    project = (
+        g.db.query(Project)
+        .filter_by(id=project_id, session_id=g.session.id)
+        .first()
+    )
+    if not project:
+        return _err("Project not found", 404)
+    cached = get_latest_completed_run(project_id)
+    if not cached:
+        return _ok({"cached": False, "run": None})
+    return _ok({"cached": True, "run": cache_summary(cached)})
+
+
 @api_bp.get("/analysis-history")
 @with_db
 def analysis_history():
@@ -150,18 +168,24 @@ def analyze():
                 f"Demo '{demo_id}' not on disk — upload its ZIP via /upload-project first",
                 404,
             )
-        project = Project(
-            session_id=g.session.id,
-            name=meta["name"],
-            source_type="demo",
-            demo_id=demo_id,
-            framework=meta["framework"],
-            root_path=str(demo_path.resolve()),
-            dependency_count=meta["dependency_count"],
+        project = (
+            g.db.query(Project)
+            .filter_by(session_id=g.session.id, demo_id=demo_id)
+            .first()
         )
-        g.db.add(project)
-        g.db.commit()
-        g.db.refresh(project)
+        if not project:
+            project = Project(
+                session_id=g.session.id,
+                name=meta["name"],
+                source_type="demo",
+                demo_id=demo_id,
+                framework=meta["framework"],
+                root_path=str(demo_path.resolve()),
+                dependency_count=meta["dependency_count"],
+            )
+            g.db.add(project)
+            g.db.commit()
+            g.db.refresh(project)
         project_id = project.id
 
     if not project_id:
@@ -175,8 +199,23 @@ def analyze():
     if not project:
         return _err("Project not found", 404)
 
-    job_id = start_analysis(project.id)
-    return _ok({"job_id": job_id, "project_id": project.id}, 202)
+    use_cache = body.get("use_cache", True)
+    force = body.get("force", False)
+    if use_cache and not force:
+        cached = get_latest_completed_run(project.id)
+        if cached:
+            return _ok(
+                {
+                    "job_id": cached.job_id,
+                    "project_id": project.id,
+                    "cached": True,
+                },
+                200,
+            )
+
+    correlation_id = getattr(g, "correlation_id", None)
+    job_id = start_analysis(project.id, correlation_id=correlation_id)
+    return _ok({"job_id": job_id, "project_id": project.id, "cached": False}, 202)
 
 
 @api_bp.post("/simulate")
@@ -195,8 +234,9 @@ def reanalyze(project_id: int):
     )
     if not project:
         return _err("Project not found", 404)
-    job_id = start_analysis(project.id, reanalyze=True)
-    return _ok({"job_id": job_id, "project_id": project.id}, 202)
+    correlation_id = getattr(g, "correlation_id", None)
+    job_id = start_analysis(project.id, reanalyze=True, correlation_id=correlation_id)
+    return _ok({"job_id": job_id, "project_id": project.id, "cached": False}, 202)
 
 
 @api_bp.get("/status/<job_id>")
@@ -282,7 +322,9 @@ def results(job_id: str):
             "risk": risk,
             "scenarios": scenarios,
             "telemetry": telemetry,
+            "heatmap": (run.telemetry.metrics or {}).get("heatmap", []) if run.telemetry else [],
             "ai": ai,
+            "correlation_id": run.correlation_id,
             "completed_at": run.completed_at.isoformat() if run.completed_at else None,
         }
     )
@@ -307,6 +349,45 @@ def logs(job_id: str):
                 for log in run.logs
             ]
         }
+    )
+
+
+@api_bp.get("/stream/logs/<job_id>")
+@with_db
+def stream_logs(job_id: str):
+    """Server-Sent Events stream of pipeline logs for a job."""
+
+    def generate():
+        seen = 0
+        idle = 0
+        while idle < 30:
+            run = _get_run(job_id)
+            if not run:
+                yield f"data: {json.dumps({'error': 'not_found'})}\n\n"
+                break
+            logs = run.logs
+            if len(logs) > seen:
+                for log in logs[seen:]:
+                    payload = {
+                        "level": log.level,
+                        "message": log.message,
+                        "source": log.source,
+                        "created_at": log.created_at.isoformat(),
+                        "payload": log.payload,
+                    }
+                    yield f"data: {json.dumps(payload)}\n\n"
+                seen = len(logs)
+                idle = 0
+            if run.status in ("completed", "failed"):
+                yield f"data: {json.dumps({'done': True, 'status': run.status})}\n\n"
+                break
+            idle += 1
+            time.sleep(0.8)
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 

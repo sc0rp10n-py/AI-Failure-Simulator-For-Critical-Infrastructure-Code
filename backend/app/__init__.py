@@ -4,6 +4,7 @@ from flask_cors import CORS
 from app.config import settings
 from app.logging.structured import get_logger
 from app.models.db import init_db
+from app.middleware.correlation import register_correlation_middleware
 from app.routes.api import api_bp
 from app.services.session_service import ensure_session_middleware
 
@@ -24,6 +25,7 @@ def create_app() -> Flask:
     )
 
     init_db()
+    register_correlation_middleware(app)
     ensure_session_middleware(app)
     app.register_blueprint(api_bp)
 

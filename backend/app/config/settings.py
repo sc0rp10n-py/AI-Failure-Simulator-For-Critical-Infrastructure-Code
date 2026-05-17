@@ -10,6 +10,7 @@ DATA_DIR = BASE_DIR / "data"
 UPLOAD_ROOT = Path(os.getenv("SENTINEL_UPLOAD_ROOT", BASE_DIR / "uploads"))
 OUTPUT_ROOT = Path(os.getenv("SENTINEL_OUTPUT_ROOT", BASE_DIR / "outputs"))
 LOG_DIR = BASE_DIR / "logs"
+TEMP_DIR = BASE_DIR / "temp"
 DEMO_ROOT = Path(os.getenv("SENTINEL_DEMO_ROOT", BASE_DIR.parent))
 DB_PATH = Path(os.getenv("SENTINEL_DB_PATH", DATA_DIR / "sentinel.db"))
 SESSION_SECRET = os.getenv("SENTINEL_SESSION_SECRET", "sentinel-dev-secret")
@@ -26,7 +27,7 @@ CORS_ORIGINS = [
     if origin.strip()
 ]
 
-for path in (DATA_DIR, UPLOAD_ROOT, OUTPUT_ROOT, LOG_DIR):
+for path in (DATA_DIR, UPLOAD_ROOT, OUTPUT_ROOT, LOG_DIR, TEMP_DIR):
     path.mkdir(parents=True, exist_ok=True)
 
 DEMO_CATALOG = {

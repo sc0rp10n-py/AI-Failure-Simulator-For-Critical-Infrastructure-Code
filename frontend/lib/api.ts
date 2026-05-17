@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:1001";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001";
 
 type ApiResponse<T> = {
   success: boolean;
@@ -110,10 +110,15 @@ export type AnalysisResults = {
     injected: boolean;
     outcome: string | null;
   }>;
+  heatmap?: Array<{ category: string; severity: string; weight: number }>;
+  correlation_id?: string;
   telemetry: {
-    metrics: Record<string, number>;
+    metrics: Record<string, number | unknown>;
     timeline: Array<Record<string, unknown>>;
-    dependency_graph: { nodes: unknown[]; edges: unknown[] };
+    dependency_graph: {
+      nodes: Array<{ id: string; label: string; kind: string }>;
+      edges: Array<{ from: string; to: string; critical?: boolean }>;
+    };
     blast_radius: Record<string, unknown>;
   };
   ai: {
@@ -137,11 +142,23 @@ export const api = {
       body: form,
     });
   },
-  analyze: (body: { project_id?: number; demo_id?: string }) =>
-    request<{ job_id: string; project_id: number }>("/api/analyze", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
+  analyze: (body: {
+    project_id?: number;
+    demo_id?: string;
+    use_cache?: boolean;
+    force?: boolean;
+  }) =>
+    request<{ job_id: string; project_id: number; cached?: boolean }>(
+      "/api/analyze",
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    ),
+  projectCache: (projectId: number) =>
+    request<{ cached: boolean; run: HistoryItem | null }>(
+      `/api/projects/${projectId}/cache`,
+    ),
   reanalyze: (projectId: number) =>
     request<{ job_id: string; project_id: number }>(
       `/api/reanalyze/${projectId}`,
