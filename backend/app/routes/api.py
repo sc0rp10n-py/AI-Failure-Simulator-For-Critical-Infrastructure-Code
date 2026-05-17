@@ -83,10 +83,7 @@ def list_projects():
                 }
                 for p in projects
             ],
-            "demos": [
-                {**meta, "available": (meta["path"]).exists()}
-                for meta in settings.DEMO_CATALOG.values()
-            ],
+            "demos": [_demo_response(meta) for meta in settings.DEMO_CATALOG.values()],
         }
     )
 
@@ -331,6 +328,20 @@ def _get_run(job_id: str) -> AnalysisRun | None:
         .filter(AnalysisRun.job_id == job_id, Project.session_id == g.session.id)
         .first()
     )
+
+
+def _demo_response(meta: dict) -> dict:
+    path: Path = meta["path"]
+    return {
+        "id": meta["id"],
+        "name": meta["name"],
+        "framework": meta["framework"],
+        "architecture": meta["architecture"],
+        "risk_level": meta["risk_level"],
+        "dependency_count": meta["dependency_count"],
+        "description": meta["description"],
+        "available": path.exists(),
+    }
 
 
 def _latest_run_summary(db, project_id: int) -> dict | None:

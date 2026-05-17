@@ -19,6 +19,8 @@ def create_app() -> Flask:
         app,
         origins=settings.CORS_ORIGINS,
         supports_credentials=True,
+        allow_headers=["Content-Type"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     )
 
     init_db()

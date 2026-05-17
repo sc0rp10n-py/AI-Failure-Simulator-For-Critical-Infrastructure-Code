@@ -19,7 +19,11 @@ OLLAMA_MODEL = os.getenv("SENTINEL_OLLAMA_MODEL", "gemma2:2b")
 OPENAI_BASE_URL = os.getenv("SENTINEL_OPENAI_BASE_URL", "")
 OPENAI_API_KEY = os.getenv("SENTINEL_OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("SENTINEL_OPENAI_MODEL", "gpt-4o-mini")
-CORS_ORIGINS = os.getenv("SENTINEL_CORS_ORIGINS", "http://localhost:3000").split(",")
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("SENTINEL_CORS_ORIGINS", "http://localhost:1000").split(",")
+    if origin.strip()
+]
 
 for path in (DATA_DIR, UPLOAD_ROOT, OUTPUT_ROOT, LOG_DIR):
     path.mkdir(parents=True, exist_ok=True)
