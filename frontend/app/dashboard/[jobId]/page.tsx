@@ -128,8 +128,8 @@ export default function DashboardPage() {
             <p className="text-sm text-zinc-300">{data.ai?.root_cause}</p>
             <h3 className="mt-4 text-sm font-medium text-white">Remediation</h3>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-400">
-              {(data.ai?.remediation ?? []).map((item) => (
-                <li key={item}>{item}</li>
+              {(data.ai?.remediation ?? []).map((item, index) => (
+                <li key={`remediation-${index}`}>{item}</li>
               ))}
             </ul>
           </Card>

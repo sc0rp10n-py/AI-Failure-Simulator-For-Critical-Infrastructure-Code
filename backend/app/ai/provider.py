@@ -27,10 +27,18 @@ def analyze_with_llm(prompt_name: str, context: dict) -> dict | None:
     return None
 
 
+def _ollama_headers() -> dict[str, str]:
+    headers: dict[str, str] = {}
+    if settings.OLLAMA_API_KEY:
+        headers["Authorization"] = f"Bearer {settings.OLLAMA_API_KEY}"
+    return headers
+
+
 def _ollama(system: str, user: str) -> dict | None:
     try:
         response = httpx.post(
             f"{settings.OLLAMA_BASE_URL.rstrip('/')}/api/chat",
+            headers=_ollama_headers(),
             json={
                 "model": settings.OLLAMA_MODEL,
                 "messages": [

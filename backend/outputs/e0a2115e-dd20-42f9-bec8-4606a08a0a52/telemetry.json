@@ -1,0 +1,288 @@
+{
+  "metrics": {
+    "requests_total": 160,
+    "requests_failed": 0,
+    "p50_ms": 2279.0,
+    "p95_ms": 2314.9,
+    "p99_ms": 2373.3,
+    "error_rate": 0.0
+  },
+  "traces": {
+    "spans": [
+      {
+        "ts": 1779038433.216157,
+        "stage": "simulation",
+        "scenario": "Upstream 500 storm",
+        "target": "src/payment-service.js",
+        "latency_ms": 2279.0,
+        "failed": false,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038433.616157,
+        "stage": "simulation",
+        "scenario": "Retry storm",
+        "target": "src/payment-service.js",
+        "latency_ms": 2314.9,
+        "failed": false,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038434.016157,
+        "stage": "simulation",
+        "scenario": "Cascading failure",
+        "target": ".",
+        "latency_ms": 166.6,
+        "failed": false,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038434.416157,
+        "stage": "simulation",
+        "scenario": "Simulate reliability fault",
+        "target": "src/payment-service.js",
+        "latency_ms": 2007.7,
+        "failed": false,
+        "severity": "High"
+      },
+      {
+        "ts": 1779038434.8161569,
+        "stage": "simulation",
+        "scenario": "Simulate reliability fault",
+        "target": "src/payment-service.js",
+        "latency_ms": 2373.3,
+        "failed": false,
+        "severity": "Medium"
+      },
+      {
+        "ts": 1779038435.216157,
+        "stage": "simulation",
+        "scenario": "Simulate reliability fault",
+        "target": "src/gateway.js",
+        "latency_ms": 1351.4,
+        "failed": false,
+        "severity": "High"
+      }
+    ]
+  },
+  "timeline": [
+    {
+      "ts": 1779038433.216157,
+      "stage": "simulation",
+      "scenario": "Upstream 500 storm",
+      "target": "src/payment-service.js",
+      "latency_ms": 2279.0,
+      "failed": false,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038433.616157,
+      "stage": "simulation",
+      "scenario": "Retry storm",
+      "target": "src/payment-service.js",
+      "latency_ms": 2314.9,
+      "failed": false,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038434.016157,
+      "stage": "simulation",
+      "scenario": "Cascading failure",
+      "target": ".",
+      "latency_ms": 166.6,
+      "failed": false,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038434.416157,
+      "stage": "simulation",
+      "scenario": "Simulate reliability fault",
+      "target": "src/payment-service.js",
+      "latency_ms": 2007.7,
+      "failed": false,
+      "severity": "High"
+    },
+    {
+      "ts": 1779038434.8161569,
+      "stage": "simulation",
+      "scenario": "Simulate reliability fault",
+      "target": "src/payment-service.js",
+      "latency_ms": 2373.3,
+      "failed": false,
+      "severity": "Medium"
+    },
+    {
+      "ts": 1779038435.216157,
+      "stage": "simulation",
+      "scenario": "Simulate reliability fault",
+      "target": "src/gateway.js",
+      "latency_ms": 1351.4,
+      "failed": false,
+      "severity": "High"
+    }
+  ],
+  "dependency_graph": {
+    "nodes": [
+      {
+        "id": "api",
+        "label": "api",
+        "kind": "service"
+      },
+      {
+        "id": "gateway",
+        "label": "gateway",
+        "kind": "service"
+      },
+      {
+        "id": "inventory",
+        "label": "inventory",
+        "kind": "service"
+      },
+      {
+        "id": "inventory-service",
+        "label": "inventory-service",
+        "kind": "service"
+      },
+      {
+        "id": "mock-payment-provider",
+        "label": "mock-payment-provider",
+        "kind": "service"
+      },
+      {
+        "id": "payment",
+        "label": "payment",
+        "kind": "service"
+      },
+      {
+        "id": "payment-service",
+        "label": "payment-service",
+        "kind": "service"
+      },
+      {
+        "id": "postgresql",
+        "label": "postgresql",
+        "kind": "database"
+      },
+      {
+        "id": "payment-api",
+        "label": "payment-api",
+        "kind": "external"
+      }
+    ],
+    "edges": [
+      {
+        "from": "api",
+        "to": "postgresql",
+        "critical": true
+      },
+      {
+        "from": "api",
+        "to": "payment-api",
+        "critical": true
+      },
+      {
+        "from": "api",
+        "to": "gateway",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "inventory",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "inventory-service",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "mock-payment-provider",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "payment",
+        "critical": false
+      },
+      {
+        "from": "api",
+        "to": "payment-service",
+        "critical": false
+      }
+    ]
+  },
+  "blast_radius": {
+    "origin": "api",
+    "impacted_services": [
+      "api",
+      "payment-api",
+      "postgresql"
+    ],
+    "severity": "Critical",
+    "cascade_probability": 0.35,
+    "customer_impact": "localized degradation"
+  },
+  "scenarios": [
+    {
+      "name": "Upstream 500 storm",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/payment-service.js",
+      "description": "Return intermittent 500 from dependency. Triggered by: HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/payment-service.js",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Retry storm",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/payment-service.js",
+      "description": "Amplify retries when downstream is degraded. Triggered by: HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/payment-service.js",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Cascading failure",
+      "category": "architecture",
+      "severity": "High",
+      "target": ".",
+      "description": "Fail gateway when payment+inventory degrade. Triggered by: Deep critical dependency chain",
+      "related_risk_id": "dep-chain",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Simulate reliability fault",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/payment-service.js",
+      "description": "Autonomous scenario targeting HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/payment-service.js",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Simulate reliability fault",
+      "category": "reliability",
+      "severity": "Medium",
+      "target": "src/payment-service.js",
+      "description": "Autonomous scenario targeting Aggressive downstream timeout",
+      "related_risk_id": "aggressive-timeout-src/payment-service.js",
+      "injected": true,
+      "outcome": "degraded"
+    },
+    {
+      "name": "Simulate reliability fault",
+      "category": "reliability",
+      "severity": "High",
+      "target": "src/gateway.js",
+      "description": "Autonomous scenario targeting HTTP call without retry policy",
+      "related_risk_id": "no-retry-src/gateway.js",
+      "injected": true,
+      "outcome": "degraded"
+    }
+  ]
+}
