@@ -1,0 +1,13 @@
+{"timestamp":"2026-05-17T08:00:00+00:00","signal":"dispatch.latency_ms","value":6812.45,"tags":{"service":"demo2-emergency-dispatch","endpoint":"/dispatch"}}
+{"timestamp":"2026-05-17T08:00:00+00:00","signal":"queue.depth","value":18.0,"tags":{"service":"demo2-emergency-dispatch"}}
+{"timestamp":"2026-05-17T08:00:00+00:00","signal":"map_api.outage.count","value":3.0,"tags":{"service":"demo2-emergency-dispatch","provider":"mapping-api"}}
+{"timestamp":"2026-05-17T08:01:00+00:00","signal":"dispatch.latency_ms","value":7231.9,"tags":{"service":"demo2-emergency-dispatch","endpoint":"/dispatch"}}
+{"timestamp":"2026-05-17T08:01:00+00:00","signal":"queue.depth","value":21.0,"tags":{"service":"demo2-emergency-dispatch"}}
+{"timestamp":"2026-05-17T08:02:00+00:00","signal":"dispatch.latency_ms","value":5150.2,"tags":{"service":"demo2-emergency-dispatch","endpoint":"/dispatch"}}
+{"timestamp":"2026-05-17T08:02:00+00:00","signal":"queue.depth","value":14.0,"tags":{"service":"demo2-emergency-dispatch"}}
+{"timestamp":"2026-05-17T08:03:00+00:00","signal":"dispatch.latency_ms","value":6022.88,"tags":{"service":"demo2-emergency-dispatch","endpoint":"/dispatch"}}
+{"timestamp":"2026-05-17T08:03:00+00:00","signal":"queue.depth","value":23.0,"tags":{"service":"demo2-emergency-dispatch"}}
+{"timestamp":"2026-05-17T08:04:00+00:00","signal":"dispatch.latency_ms","value":731.13,"tags":{"service":"demo2-emergency-dispatch","endpoint":"/dispatch"}}
+{"timestamp":"2026-05-17T08:04:00+00:00","signal":"queue.depth","value":6.0,"tags":{"service":"demo2-emergency-dispatch"}}
+{"timestamp":"2026-05-17T08:05:00+00:00","signal":"dispatch.latency_ms","value":4229.77,"tags":{"service":"demo2-emergency-dispatch","endpoint":"/dispatch"}}
+{"timestamp":"2026-05-17T08:05:00+00:00","signal":"queue.depth","value":16.0,"tags":{"service":"demo2-emergency-dispatch"}}
