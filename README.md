@@ -1,6 +1,6 @@
 # SentinelAI
 
-Autonomous failure simulation and resilience analysis platform for backend codebases.
+Autonomous failure simulation and resilience analysis platform for production codebases.
 
 ## Stack
 
