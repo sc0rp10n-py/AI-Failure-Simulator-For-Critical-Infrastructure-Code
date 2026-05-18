@@ -190,7 +190,7 @@ export function LandingContent() {
                 remediation — every metric tied to your actual code.
               </p>
             </div>
-            <div className="relative min-h-[280px] bg-black/40">
+            <div className="relative min-h-70 bg-black/40">
               <svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 280">
                 <motion.line
                   x1="40" y1="140" x2="160" y2="80"
