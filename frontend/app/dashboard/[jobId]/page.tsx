@@ -216,7 +216,7 @@ export default function DashboardPage() {
         <div className="mb-8 grid gap-6 lg:grid-cols-2">
           <GlassPanel className="p-6">
             <h2 className="text-2xl font-semibold text-white">Detected risks</h2>
-            <ul className="mt-4 max-h-80 space-y-3 overflow-y-auto pr-1">
+            <ul className="mt-4 max-h-95 space-y-3 overflow-y-auto pr-1">
               {(data.risk?.risks ?? []).map((risk) => (
                 <li
                   key={risk.id}
