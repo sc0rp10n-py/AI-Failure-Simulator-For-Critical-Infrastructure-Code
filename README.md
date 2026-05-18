@@ -6,7 +6,7 @@ Autonomous failure simulation and resilience analysis platform for production co
 [Try it out](https://sentinel.sc0rp10n.space/)
 
 ## Demo Video
-[![IMAGE ALT TEXT HERE](/landing.jpg)](https://youtu.be/IozeTPtL2n0)
+[![Watch Demo Here](/assets/landing.jpg)](https://youtu.be/IozeTPtL2n0)
 
 ## Stack
 
