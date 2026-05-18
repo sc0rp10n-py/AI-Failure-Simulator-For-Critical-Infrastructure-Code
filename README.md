@@ -2,6 +2,12 @@
 
 Autonomous failure simulation and resilience analysis platform for production codebases.
 
+## Live Demo
+[Try it out](https://sentinel.sc0rp10n.space/)
+
+## Demo Video
+[![Watch Demo Here](/assets/landing.jpg)](https://youtu.be/IozeTPtL2n0)
+
 ## Stack
 
 - **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind, shadcn/ui, Framer Motion, GSAP, React Query, Zustand, Recharts
