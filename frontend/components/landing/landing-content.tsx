@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Brain, Network, Shield, Zap } from "lucide-react";
 
 import { HeroBackground } from "@/components/landing/hero-background";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { api } from "@/lib/api";
@@ -271,6 +272,8 @@ export function LandingContent() {
           </Link>
         </GlassPanel>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }
