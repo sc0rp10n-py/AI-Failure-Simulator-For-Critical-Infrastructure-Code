@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
+import { Google_Sans, JetBrains_Mono } from "next/font/google";
 
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+const googleSans = Google_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-google-sans",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -30,9 +29,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${cormorant.variable} ${jetbrainsMono.variable} h-full`}
+      className={`dark ${googleSans.variable} ${jetbrainsMono.variable} h-full`}
     >
-      <body className="min-h-full font-serif antialiased">
+      <body className="min-h-full font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

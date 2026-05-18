@@ -88,7 +88,7 @@ export function LandingContent() {
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="max-w-5xl text-5xl leading-[1.05] font-semibold tracking-tight text-white md:text-7xl lg:text-8xl text-glow"
+          className="max-w-5xl text-3xl leading-[1.05] font-semibold tracking-tight text-white md:text-5xl lg:text-6xl text-glow"
         >
           Simulate Real-World Chaos Before Production Does.
         </motion.h1>

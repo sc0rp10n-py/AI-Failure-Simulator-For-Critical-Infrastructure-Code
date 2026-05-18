@@ -173,7 +173,7 @@ export default function DashboardPage() {
                       background: "rgba(10,10,15,0.9)",
                       border: "1px solid rgba(255,255,255,0.1)",
                       borderRadius: 12,
-                      fontFamily: "var(--font-cormorant)",
+                      fontFamily: "var(--font-google-sans)",
                     }}
                   />
                   <Line

@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-cormorant);
+  --font-sans: var(--font-google-sans);
   --font-mono: var(--font-mono);
-  --font-heading: var(--font-cormorant);
+  --font-heading: var(--font-google-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -121,10 +121,12 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-[#030306] text-zinc-100;
-    font-family: var(--font-cormorant), Georgia, serif;
+    font-family: var(--font-google-sans), system-ui, sans-serif;
   }
+
   html {
     scroll-behavior: smooth;
   }
@@ -132,20 +134,26 @@
 
 @layer utilities {
   .glass-panel {
-    @apply rounded-3xl border border-white/[0.12] bg-white/[0.04] shadow-[0_8px_40px_rgba(0,0,0,0.45)] backdrop-blur-2xl;
+    @apply rounded-3xl border border-white/12 bg-white/4 backdrop-blur-2xl;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
   }
+
   .glass-panel-strong {
-    @apply rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-white/[0.08] to-white/[0.02] shadow-[0_0_60px_rgba(34,211,238,0.08)] backdrop-blur-2xl;
+    @apply rounded-3xl border border-cyan-400/20 bg-linear-to-br from-white/8 to-white/2 backdrop-blur-2xl;
+    box-shadow: 0 0 60px rgba(34, 211, 238, 0.08);
   }
+
   .text-glow {
     text-shadow: 0 0 40px rgba(34, 211, 238, 0.35);
   }
+
   .ambient-grid {
     background-image:
       linear-gradient(rgba(34, 211, 238, 0.06) 1px, transparent 1px),
       linear-gradient(90deg, rgba(34, 211, 238, 0.06) 1px, transparent 1px);
     background-size: 64px 64px;
   }
+
   .font-mono {
     font-family: var(--font-mono), ui-monospace, monospace;
   }
