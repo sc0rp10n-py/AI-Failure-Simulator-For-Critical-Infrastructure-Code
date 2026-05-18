@@ -42,7 +42,7 @@ sleep 5
 
 echo "=== Health Check ==="
 
-curl -i https://sentinel.sc0rp10n.space/api/health
+curl -i https://sentinel-backend.sc0rp10n.space/health
 
 echo ""
 echo "=== Deployment Complete ==="
