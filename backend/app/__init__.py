@@ -14,7 +14,7 @@ logger = get_logger("app")
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = settings.SESSION_SECRET
-    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+    app.config["MAX_CONTENT_LENGTH"] = 5000 * 1024 * 1024
 
     CORS(
         app,
