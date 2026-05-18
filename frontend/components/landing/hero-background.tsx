@@ -4,34 +4,43 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
 export function HeroBackground() {
-  const gridRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!gridRef.current) return;
+    if (!rootRef.current) return;
     const ctx = gsap.context(() => {
-      gsap.to(gridRef.current, {
-        backgroundPosition: "120px 120px",
-        duration: 18,
+      gsap.to(".hero-orb-a", {
+        x: 40,
+        y: -30,
+        duration: 6,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+      gsap.to(".hero-orb-b", {
+        x: -50,
+        y: 20,
+        duration: 8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+      gsap.to(".hero-grid", {
+        backgroundPosition: "128px 128px",
+        duration: 24,
         repeat: -1,
         ease: "none",
       });
-    });
+    }, rootRef);
     return () => ctx.revert();
   }, []);
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        ref={gridRef}
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(34,211,238,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.15) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-      <div className="absolute -left-32 top-20 h-72 w-72 rounded-full bg-cyan-500/20 blur-[120px]" />
-      <div className="absolute -right-20 bottom-10 h-80 w-80 rounded-full bg-violet-600/20 blur-[120px]" />
+    <div ref={rootRef} className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="hero-grid absolute inset-0 opacity-[0.35] ambient-grid" />
+      <div className="hero-orb-a absolute -left-32 top-16 h-96 w-96 rounded-full bg-cyan-500/20 blur-[130px]" />
+      <div className="hero-orb-b absolute -right-24 bottom-0 h-[28rem] w-[28rem] rounded-full bg-violet-600/15 blur-[140px]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#030306]/50 to-[#030306]" />
     </div>
   );
 }
