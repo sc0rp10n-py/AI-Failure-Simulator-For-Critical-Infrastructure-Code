@@ -10,6 +10,8 @@ const googleSans = Google_Sans({
     subsets: ["latin"],
     weight: ["400", "500", "600", "700"],
     variable: "--font-google-sans",
+    // Google Sans has no size-adjust metrics in next/font yet; avoids dev warnings.
+    adjustFontFallback: false,
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -35,8 +37,12 @@ export default async function RootLayout({
         <html
             lang="en"
             className={`dark ${googleSans.variable} ${jetbrainsMono.variable} h-full`}
+            suppressHydrationWarning
         >
-            <body className="min-h-full font-sans antialiased">
+            <body
+                className="min-h-full font-sans antialiased"
+                suppressHydrationWarning
+            >
                 <ViewTracker host={host} />
                 <Providers>{children}</Providers>
             </body>

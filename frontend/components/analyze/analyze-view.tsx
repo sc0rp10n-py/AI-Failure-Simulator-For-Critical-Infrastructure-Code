@@ -211,7 +211,11 @@ function HistorySection({
           <CardHeader>
             <CardTitle>{item.project_name}</CardTitle>
             <CardDescription>
-              {item.framework} · {new Date(item.created_at).toLocaleString()}
+              {item.framework} ·{" "}
+              {new Date(item.created_at).toLocaleString("en-US", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
             </CardDescription>
             <div className="flex gap-4 text-sm">
               <span className="text-cyan-300">Risk {item.risk_score.toFixed(0)}</span>
