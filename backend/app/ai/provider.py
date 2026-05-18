@@ -24,8 +24,6 @@ def analyze_with_llm(prompt_name: str, context: dict) -> dict | None:
 
     if provider == "ollama":
         return _ollama(prompt, user_content)
-    if provider in ("openai", "openai-compatible"):
-        return _openai_compatible(prompt, user_content)
     return None
 
 
@@ -79,32 +77,4 @@ def _ollama(system: str, user: str) -> dict | None:
             "Ollama unavailable, using heuristic",
             extra={"event": "llm_fallback", "error": str(exc)},
         )
-        return None
-
-
-def _openai_compatible(system: str, user: str) -> dict | None:
-    import httpx
-
-    if not settings.OPENAI_API_KEY:
-        return None
-    base = settings.OPENAI_BASE_URL or "https://api.openai.com/v1"
-    try:
-        response = httpx.post(
-            f"{base.rstrip('/')}/chat/completions",
-            headers={"Authorization": f"Bearer {settings.OPENAI_API_KEY}"},
-            json={
-                "model": settings.OPENAI_MODEL,
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-                "response_format": {"type": "json_object"},
-            },
-            timeout=90.0,
-        )
-        response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
-        return _parse_json_content(content)
-    except Exception as exc:
-        logger.info("OpenAI provider failed", extra={"event": "llm_fallback", "error": str(exc)})
         return None

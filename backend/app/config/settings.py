@@ -18,9 +18,6 @@ LLM_PROVIDER = os.getenv("SENTINEL_LLM_PROVIDER", "heuristic")
 OLLAMA_BASE_URL = os.getenv("SENTINEL_OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("SENTINEL_OLLAMA_MODEL", "gemma2:2b")
 OLLAMA_API_KEY = os.getenv("SENTINEL_OLLAMA_API_KEY", "")
-OPENAI_BASE_URL = os.getenv("SENTINEL_OPENAI_BASE_URL", "")
-OPENAI_API_KEY = os.getenv("SENTINEL_OPENAI_API_KEY", "")
-OPENAI_MODEL = os.getenv("SENTINEL_OPENAI_MODEL", "gpt-4o-mini")
 SANDBOX_ENABLED = os.getenv("SENTINEL_SANDBOX_ENABLED", "true").lower() == "true"
 SANDBOX_PREFER_DOCKER = os.getenv("SENTINEL_SANDBOX_PREFER_DOCKER", "true").lower() == "true"
 SANDBOX_USE_COMPOSE = os.getenv("SENTINEL_SANDBOX_USE_COMPOSE", "true").lower() == "true"

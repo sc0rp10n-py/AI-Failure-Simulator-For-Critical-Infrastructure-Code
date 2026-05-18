@@ -81,8 +81,7 @@ Configure via `SENTINEL_SANDBOX_*` in `backend/.env` (see `.env.example`). Requi
 Set in `backend/.env`:
 
 - `SENTINEL_LLM_PROVIDER=heuristic` (default, no external API)
-- `SENTINEL_LLM_PROVIDER=ollama` + Ollama URL/model (e.g. `gemma2:2b` via `SENTINEL_OLLAMA_MODEL`)
-- `SENTINEL_LLM_PROVIDER=openai` + API key
+- `SENTINEL_LLM_PROVIDER=ollama` + Ollama URL/model (e.g. `gemma3:27b-cloud` via `SENTINEL_OLLAMA_MODEL`)
 
 ## Project layout
 
